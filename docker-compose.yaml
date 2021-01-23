@@ -1,0 +1,21 @@
+version: "3"
+
+services: 
+     php:
+        build: docker/php
+        container_name: php
+        expose: 
+          - "9000"
+        volumes: 
+          - ./project:/var/www/html
+        environment: 
+          APP_ENV: dev
+    web-server:
+        build: docker/nginx
+        ports: 
+          - "8080:80"
+        container_name: nginx_server
+        volumes: 
+          - ./project:/var/www/html
+        depends_on:
+          - php
