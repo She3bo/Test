@@ -1,16 +1,17 @@
-version: "3"
-
-services: 
-     php:
+version: "2"
+services:
+    php-server:
         build: docker/php
-        container_name: php
+        container_name: php_server
         expose: 
           - "9000"
         volumes: 
           - ./project:/var/www/html
         environment: 
           APP_ENV: dev
-    web-server:
+        depends_on: 
+          - mysqldb
+    nginx-server:
         build: docker/nginx
         ports: 
           - "8080:80"
@@ -18,4 +19,29 @@ services:
         volumes: 
           - ./project:/var/www/html
         depends_on:
-          - php
+          - php-server        
+    myadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        ports:
+            - "8090:80"
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOST=${MYSQL_HOST}
+        restart: always
+        depends_on:
+            - mysqldb
+    mysqldb:
+        image: mysql
+        container_name: ${MYSQL_HOST}
+        restart: always
+        env_file:
+            - ".env"
+        environment:
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        ports:
+            - "8989:3306"
+        
